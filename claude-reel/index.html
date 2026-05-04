@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #15110d;
+        color: #f5efe6;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      :root {
+        --bg: #15110d;
+        --surface: #221a13;
+        --surface-2: #2c2218;
+        --fg: #f5efe6;
+        --fg-muted: #b8a692;
+        --accent: #d97757;
+        --accent-warm: #f0a07a;
+        --accent-deep: #a84e2f;
+        --hairline: rgba(245, 239, 230, 0.14);
+      }
+
+      /* Persistent decoratives — always visible across the 15s */
+      .deco-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .glow-top {
+        position: absolute;
+        top: -200px;
+        right: -200px;
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(217, 119, 87, 0.35) 0%, rgba(217, 119, 87, 0) 65%);
+        filter: blur(20px);
+      }
+      .glow-bottom {
+        position: absolute;
+        bottom: -300px;
+        left: -250px;
+        width: 1000px;
+        height: 1000px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(168, 78, 47, 0.28) 0%, rgba(168, 78, 47, 0) 65%);
+        filter: blur(30px);
+      }
+      .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.18;
+        mix-blend-mode: overlay;
+        background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+        background-size: 4px 4px;
+      }
+      .ghost-mark {
+        position: absolute;
+        bottom: 80px;
+        right: 60px;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(217, 119, 87, 0.10) 0%, rgba(217, 119, 87, 0) 70%);
+        filter: blur(6px);
+      }
+      .vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+      }
+
+      /* Brand mark — top-left, persistent */
+      .brand {
+        position: absolute;
+        top: 60px;
+        left: 60px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        z-index: 5;
+      }
+      .brand-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 24px rgba(217, 119, 87, 0.7);
+      }
+      .brand-text {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 700;
+        font-size: 28px;
+        letter-spacing: -0.02em;
+        color: var(--fg);
+      }
+
+      /* Generic scene container */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 160px 80px 120px;
+        z-index: 2;
+      }
+
+      /* Scene header (compact single line) */
+      .scene-head {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 16px 0 24px;
+        border-bottom: 2px solid var(--hairline);
+      }
+      .scene-num {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 900;
+        font-size: 64px;
+        line-height: 1.0;
+        letter-spacing: -0.04em;
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+      .scene-num-rule {
+        flex-shrink: 0;
+        width: 56px;
+        height: 4px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+      .scene-num-suffix {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 28px;
+        letter-spacing: 0.22em;
+        color: #d6c8b3;
+        text-transform: uppercase;
+        line-height: 1.1;
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* Scene 1 — Hook */
+      #s1 .hook-tag {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+        font-size: 22px;
+        letter-spacing: 0.5em;
+        color: var(--accent);
+        text-transform: uppercase;
+        text-align: center;
+        margin-bottom: 80px;
+      }
+      #s1 .hook-stack {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+      }
+      #s1 .hook-line {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 900;
+        font-size: 180px;
+        line-height: 0.95;
+        letter-spacing: -0.045em;
+        color: var(--fg);
+        text-align: center;
+        text-transform: uppercase;
+      }
+      #s1 .hook-italic {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 300;
+        font-style: italic;
+        font-size: 150px;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--fg-muted);
+        text-transform: lowercase;
+      }
+      #s1 .hook-bold {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 900;
+        font-size: 220px;
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+        color: var(--accent);
+      }
+      #s1 .hook-foot {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+        font-size: 32px;
+        letter-spacing: 0.04em;
+        color: var(--fg-muted);
+        text-align: center;
+        margin-top: 80px;
+      }
+      #s1 .hook-foot strong {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* Feature scenes shared layout */
+      .feat-title {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 900;
+        font-size: 130px;
+        line-height: 0.92;
+        letter-spacing: -0.045em;
+        color: var(--fg);
+        text-transform: uppercase;
+        margin-top: 56px;
+      }
+      .feat-claim {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 300;
+        font-style: italic;
+        font-size: 64px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: var(--accent-warm);
+        margin-top: 32px;
+        max-width: 880px;
+      }
+      .feat-detail {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 400;
+        font-size: 38px;
+        line-height: 1.35;
+        color: var(--fg-muted);
+        margin-top: 36px;
+        max-width: 860px;
+      }
+      .feat-stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 60px;
+        position: relative;
+        min-height: 540px;
+      }
+
+      /* Scene 2 — Projets — card stack visual */
+      .stack {
+        position: relative;
+        width: 720px;
+        height: 480px;
+      }
+      .stack-card {
+        position: absolute;
+        width: 580px;
+        height: 380px;
+        background: var(--surface);
+        border: 2px solid var(--hairline);
+        border-radius: 18px;
+        padding: 36px 40px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+      }
+      .stack-card.c1 {
+        top: 0;
+        left: 0;
+        transform: rotate(-6deg);
+      }
+      .stack-card.c2 {
+        top: 50px;
+        left: 70px;
+        transform: rotate(0deg);
+        background: var(--surface-2);
+      }
+      .stack-card.c3 {
+        top: 100px;
+        left: 140px;
+        transform: rotate(5deg);
+        background: linear-gradient(135deg, var(--surface-2), #3a2c20);
+        border-color: rgba(217, 119, 87, 0.4);
+      }
+      .stack-card .card-tag {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.22em;
+        color: var(--accent-warm);
+        text-transform: uppercase;
+      }
+      .stack-card .card-title {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 700;
+        font-size: 44px;
+        line-height: 1.05;
+        color: var(--fg);
+        margin-top: 18px;
+      }
+      .stack-card .card-rows {
+        margin-top: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .stack-card .card-row {
+        height: 12px;
+        border-radius: 4px;
+        background: var(--hairline);
+      }
+      .stack-card .card-row.short {
+        width: 60%;
+      }
+
+      /* Scene 3 — Skills — modular blocks */
+      .skill-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        width: 720px;
+      }
+      .skill-tile {
+        aspect-ratio: 1 / 1;
+        background: var(--surface);
+        border: 2px solid var(--hairline);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 22px;
+      }
+      .skill-tile.lit {
+        background: linear-gradient(135deg, rgba(217, 119, 87, 0.18), rgba(217, 119, 87, 0.04));
+        border-color: var(--accent);
+      }
+      .skill-tile-num {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 56px;
+        color: var(--accent-warm);
+        line-height: 1;
+      }
+      .skill-tile.lit .skill-tile-num {
+        color: var(--fg);
+      }
+      .skill-tile-label {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.14em;
+        color: #d6c8b3;
+        text-transform: uppercase;
+      }
+      .skill-tile.lit .skill-tile-label {
+        color: var(--fg);
+      }
+
+      /* Scene 4 — Design — wireframe sketch */
+      .design-frame {
+        width: 760px;
+        height: 480px;
+        background: var(--surface);
+        border: 2px solid var(--hairline);
+        border-radius: 22px;
+        padding: 28px;
+        position: relative;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.55);
+      }
+      .design-bar {
+        height: 36px;
+        background: var(--bg);
+        border-radius: 8px;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 16px;
+      }
+      .design-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--hairline);
+      }
+      .design-canvas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        height: calc(100% - 58px);
+      }
+      .design-block {
+        background: var(--bg);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+      .design-block.tall { grid-row: span 2; }
+      .design-block .fill {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, transparent, rgba(217, 119, 87, 0.5));
+      }
+      .design-block .ribbon {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        height: 8px;
+        border-radius: 4px;
+        background: var(--accent);
+      }
+      .design-block .ribbon.short { width: 50%; right: auto; }
+      .design-canvas-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .design-line {
+        height: 14px;
+        border-radius: 4px;
+        background: var(--hairline);
+      }
+      .design-line.s { width: 65%; }
+      .design-line.xs { width: 35%; }
+
+      /* Scene 5 — Agent Web — browser mockup with cursor */
+      .browser {
+        width: 800px;
+        height: 540px;
+        background: var(--surface);
+        border: 2px solid var(--hairline);
+        border-radius: 18px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 50px 90px rgba(0, 0, 0, 0.55);
+      }
+      .browser-bar {
+        height: 56px;
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        gap: 8px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .browser-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .browser-dot.r { background: #c95c4a; }
+      .browser-dot.y { background: #d6a04a; }
+      .browser-dot.g { background: #6fa55a; }
+      .browser-url {
+        margin-left: 14px;
+        flex: 1;
+        height: 32px;
+        background: var(--bg);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        font-family: "JetBrains Mono", "Space Grotesk", monospace;
+        font-size: 18px;
+        color: var(--fg-muted);
+        letter-spacing: 0.02em;
+        overflow: hidden;
+      }
+      .browser-content {
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .result-row {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        padding: 16px;
+        border-radius: 10px;
+        background: var(--bg);
+      }
+      .result-row.hit {
+        background: linear-gradient(90deg, rgba(217, 119, 87, 0.18), rgba(217, 119, 87, 0));
+        border: 1px solid rgba(217, 119, 87, 0.45);
+      }
+      .result-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--surface-2);
+        flex-shrink: 0;
+      }
+      .result-row.hit .result-icon {
+        background: var(--accent);
+      }
+      .result-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .result-text .l1 {
+        height: 14px;
+        border-radius: 4px;
+        background: var(--fg-muted);
+        opacity: 0.6;
+        width: 70%;
+      }
+      .result-text .l2 {
+        height: 10px;
+        border-radius: 4px;
+        background: var(--hairline);
+        width: 90%;
+      }
+      .result-row.hit .result-text .l1 {
+        background: var(--fg);
+        opacity: 1;
+      }
+      .cursor {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        z-index: 4;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+      }
+      .cursor svg { width: 100%; height: 100%; }
+
+      /* Scene 6 — CTA */
+      #s6 {
+        align-items: center;
+        justify-content: center;
+        padding: 200px 80px;
+      }
+      #s6 .cta-stage {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 32px;
+      }
+      #s6 .cta-pre {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+        font-size: 32px;
+        letter-spacing: 0.4em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+      #s6 .cta-headline {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 900;
+        font-size: 200px;
+        line-height: 0.92;
+        letter-spacing: -0.05em;
+        color: var(--fg);
+        text-transform: uppercase;
+      }
+      #s6 .cta-headline em {
+        font-style: italic;
+        font-weight: 300;
+        color: var(--accent);
+      }
+      #s6 .cta-rule {
+        width: 0;
+        height: 4px;
+        background: var(--accent);
+      }
+      #s6 .cta-url {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 64px;
+        letter-spacing: -0.01em;
+        color: var(--fg);
+        margin-top: 12px;
+      }
+      #s6 .cta-url span { color: var(--accent); }
+
+      /* Page progress bar — bottom edge, persistent */
+      .progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 6px;
+        background: rgba(245, 239, 230, 0.06);
+        z-index: 6;
+      }
+      .progress-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent-deep), var(--accent), var(--accent-warm));
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="15"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Persistent decoratives (no clip class — always rendered) -->
+      <div class="deco-layer">
+        <div class="glow-top" id="d-glow-top"></div>
+        <div class="glow-bottom" id="d-glow-bottom"></div>
+        <div class="grain"></div>
+        <div class="ghost-mark" id="d-ghost"></div>
+        <div class="vignette"></div>
+      </div>
+
+      <!-- Brand (always visible) -->
+      <div class="brand">
+        <div class="brand-dot" id="b-dot"></div>
+        <div class="brand-text">Claude</div>
+      </div>
+
+      <!-- Persistent progress bar -->
+      <div class="progress-track">
+        <div class="progress-fill" id="d-progress"></div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- SCENE 1 — HOOK (0 → 2s) -->
+      <!-- ====================================================== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="2" data-track-index="1">
+        <div class="hook-tag" id="s1-tag">Pour les entrepreneurs</div>
+        <div class="hook-stack">
+          <div class="hook-line" id="s1-l1">Tu bosses</div>
+          <div class="hook-italic" id="s1-l2">encore</div>
+          <div class="hook-bold" id="s1-l3">tout seul ?</div>
+        </div>
+        <div class="hook-foot" id="s1-foot"><strong>4</strong> super-pouvoirs · 13 sec</div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- SCENE 2 — PROJETS (2 → 4.5s) -->
+      <!-- ====================================================== -->
+      <div id="s2" class="clip scene" data-start="2" data-duration="2.5" data-track-index="1">
+        <div class="scene-head" data-layout-allow-overflow>
+          <div class="scene-num" id="s2-num">01</div>
+          <div class="scene-num-rule"></div>
+          <div class="scene-num-suffix" id="s2-suf">Projets</div>
+        </div>
+        <div class="feat-stage">
+          <div class="stack">
+            <div class="stack-card c1" id="s2-c1">
+              <div class="card-tag">CLIENT · ACME</div>
+              <div class="card-title">Stratégie Q3</div>
+              <div class="card-rows">
+                <div class="card-row"></div>
+                <div class="card-row short"></div>
+                <div class="card-row"></div>
+              </div>
+            </div>
+            <div class="stack-card c2" id="s2-c2">
+              <div class="card-tag">PROCESS</div>
+              <div class="card-title">Onboarding</div>
+              <div class="card-rows">
+                <div class="card-row"></div>
+                <div class="card-row"></div>
+                <div class="card-row short"></div>
+              </div>
+            </div>
+            <div class="stack-card c3" id="s2-c3">
+              <div class="card-tag">MA MARQUE</div>
+              <div class="card-title">Ton de voix</div>
+              <div class="card-rows">
+                <div class="card-row"></div>
+                <div class="card-row short"></div>
+                <div class="card-row"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="feat-title" id="s2-title">Ta&nbsp;mémoire</div>
+        <div class="feat-claim" id="s2-claim">Docs, méthodes, clients — il se souvient de tout.</div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- SCENE 3 — SKILLS (4.5 → 7s) -->
+      <!-- ====================================================== -->
+      <div id="s3" class="clip scene" data-start="4.5" data-duration="2.5" data-track-index="1">
+        <div class="scene-head" data-layout-allow-overflow>
+          <div class="scene-num" id="s3-num">02</div>
+          <div class="scene-num-rule"></div>
+          <div class="scene-num-suffix" id="s3-suf">Skills</div>
+        </div>
+        <div class="feat-stage">
+          <div class="skill-grid">
+            <div class="skill-tile" id="s3-t1"><div class="skill-tile-num">01</div><div class="skill-tile-label">Devis</div></div>
+            <div class="skill-tile" id="s3-t2"><div class="skill-tile-num">02</div><div class="skill-tile-label">Réponse&nbsp;Mail</div></div>
+            <div class="skill-tile" id="s3-t3"><div class="skill-tile-num">03</div><div class="skill-tile-label">Audit</div></div>
+            <div class="skill-tile" id="s3-t4"><div class="skill-tile-num">04</div><div class="skill-tile-label">Brief</div></div>
+            <div class="skill-tile lit" id="s3-t5"><div class="skill-tile-num">05</div><div class="skill-tile-label">Custom</div></div>
+            <div class="skill-tile" id="s3-t6"><div class="skill-tile-num">06</div><div class="skill-tile-label">Rapport</div></div>
+          </div>
+        </div>
+        <div class="feat-title" id="s3-title">Tes process,</div>
+        <div class="feat-claim" id="s3-claim">automatisés. Une fois — pour la vie.</div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- SCENE 4 — DESIGN (7 → 9.5s) -->
+      <!-- ====================================================== -->
+      <div id="s4" class="clip scene" data-start="7" data-duration="2.5" data-track-index="1">
+        <div class="scene-head" data-layout-allow-overflow>
+          <div class="scene-num" id="s4-num">03</div>
+          <div class="scene-num-rule"></div>
+          <div class="scene-num-suffix" id="s4-suf">Design</div>
+        </div>
+        <div class="feat-stage">
+          <div class="design-frame" id="s4-frame">
+            <div class="design-bar">
+              <div class="design-dot"></div>
+              <div class="design-dot"></div>
+              <div class="design-dot"></div>
+            </div>
+            <div class="design-canvas">
+              <div class="design-block tall" id="s4-b1">
+                <div class="ribbon"></div>
+                <div class="fill" id="s4-fill1" style="height: 0%"></div>
+              </div>
+              <div class="design-block" id="s4-b2">
+                <div class="ribbon short"></div>
+              </div>
+              <div class="design-block" id="s4-b3">
+                <div class="fill" id="s4-fill2" style="height: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="feat-title" id="s4-title">Slides, sites,</div>
+        <div class="feat-claim" id="s4-claim">visuels — du brief au rendu, instantané.</div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- SCENE 5 — AGENT WEB (9.5 → 12.5s) -->
+      <!-- ====================================================== -->
+      <div id="s5" class="clip scene" data-start="9.5" data-duration="3" data-track-index="1">
+        <div class="scene-head" data-layout-allow-overflow>
+          <div class="scene-num" id="s5-num">04</div>
+          <div class="scene-num-rule"></div>
+          <div class="scene-num-suffix" id="s5-suf">Agent web</div>
+        </div>
+        <div class="feat-stage">
+          <div class="browser" id="s5-browser">
+            <div class="browser-bar">
+              <div class="browser-dot r"></div>
+              <div class="browser-dot y"></div>
+              <div class="browser-dot g"></div>
+              <div class="browser-url" id="s5-url">linkedin.com/in/prospect</div>
+            </div>
+            <div class="browser-content">
+              <div class="result-row" id="s5-r1">
+                <div class="result-icon"></div>
+                <div class="result-text"><div class="l1"></div><div class="l2"></div></div>
+              </div>
+              <div class="result-row hit" id="s5-r2">
+                <div class="result-icon"></div>
+                <div class="result-text"><div class="l1"></div><div class="l2"></div></div>
+              </div>
+              <div class="result-row" id="s5-r3">
+                <div class="result-icon"></div>
+                <div class="result-text"><div class="l1"></div><div class="l2"></div></div>
+              </div>
+            </div>
+            <div class="cursor" id="s5-cursor" data-layout-allow-overflow>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 2 L3 18 L8 13 L11 20 L14 19 L11 12 L18 12 Z" fill="#f5efe6" stroke="#15110d" stroke-width="1"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="feat-title" id="s5-title">Il prend</div>
+        <div class="feat-claim" id="s5-claim">le navigateur. Pendant que tu bosses ailleurs.</div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- SCENE 6 — CTA (12.5 → 15s) -->
+      <!-- ====================================================== -->
+      <div id="s6" class="clip scene" data-start="12.5" data-duration="2.5" data-track-index="1">
+        <div class="cta-stage">
+          <div class="cta-pre" id="s6-pre">Et toi ?</div>
+          <div class="cta-headline" id="s6-h">
+            <span id="s6-h1">Arrête</span><br/>
+            <em id="s6-h2">de tout faire</em><br/>
+            <span id="s6-h3">seul.</span>
+          </div>
+          <div class="cta-rule" id="s6-rule"></div>
+          <div class="cta-url" id="s6-url">claude<span>.ai</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* ---------- Persistent decoratives — ambient motion across full duration ---------- */
+      // Glow breathing (top + bottom)
+      tl.to("#d-glow-top", { scale: 1.18, opacity: 0.85, duration: 4.2, ease: "sine.inOut", yoyo: true, repeat: 2 }, 0);
+      tl.to("#d-glow-bottom", { scale: 1.12, opacity: 0.9, duration: 5.0, ease: "sine.inOut", yoyo: true, repeat: 1 }, 0.3);
+      // Ghost mark slow drift
+      tl.fromTo("#d-ghost", { rotation: -3, x: 0 }, { rotation: 3, x: -40, duration: 15, ease: "sine.inOut" }, 0);
+      // Brand dot pulse
+      tl.to("#b-dot", { scale: 1.25, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: 8 }, 0);
+      // Progress bar fills linearly across 15s
+      tl.fromTo("#d-progress", { width: "0%" }, { width: "100%", duration: 15, ease: "none" }, 0);
+
+      /* ====================================================== */
+      /* SCENE 1 — HOOK (0 → 2s) */
+      /* ====================================================== */
+      tl.fromTo("#s1-tag", { opacity: 0, y: -20, letterSpacing: "0.2em" }, { opacity: 1, y: 0, letterSpacing: "0.5em", duration: 0.55, ease: "power2.out" }, 0.15);
+      tl.fromTo("#s1-l1", { opacity: 0, x: -300, skewX: -8 }, { opacity: 1, x: 0, skewX: 0, duration: 0.55, ease: "expo.out" }, 0.30);
+      tl.fromTo("#s1-l2", { opacity: 0, scale: 1.6, filter: "blur(20px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.7, ease: "sine.out" }, 0.65);
+      tl.fromTo("#s1-l3", { opacity: 0, y: 200, scale: 1.3 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 1.0);
+      tl.fromTo("#s1-foot", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 1.45);
+
+      /* ====================================================== */
+      /* SCENE 2 — PROJETS (2 → 4.5s) */
+      /* ====================================================== */
+      const t2 = 2;
+      // Velocity-matched ENTRY: scene whips in from below with blur clear
+      tl.fromTo("#s2-num", { opacity: 0, y: 60, filter: "blur(18px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.55, ease: "power3.out" }, t2 + 0.05);
+      tl.fromTo("#s2-suf", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, t2 + 0.15);
+      // Card stack cascade (different angles + fade)
+      tl.fromTo("#s2-c1", { opacity: 0, y: 100, rotation: -18, scale: 0.9 }, { opacity: 1, y: 0, rotation: -6, scale: 1, duration: 0.65, ease: "back.out(1.4)" }, t2 + 0.30);
+      tl.fromTo("#s2-c2", { opacity: 0, y: 120, rotation: 12, scale: 0.85 }, { opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.65, ease: "back.out(1.4)" }, t2 + 0.45);
+      tl.fromTo("#s2-c3", { opacity: 0, y: 140, rotation: -10, scale: 0.85 }, { opacity: 1, y: 0, rotation: 5, scale: 1, duration: 0.65, ease: "back.out(1.5)" }, t2 + 0.60);
+      // Ambient breath on a non-clip wrapper would conflict less; here we move it onto sibling elements instead.
+      tl.to(["#s2-c1 .card-row", "#s2-c2 .card-row"], { opacity: 0.35, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 1, stagger: 0.05 }, t2 + 1.4);
+      // Title + claim
+      tl.fromTo("#s2-title", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.55, ease: "expo.out" }, t2 + 0.85);
+      tl.fromTo("#s2-claim", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t2 + 1.05);
+
+      /* ====================================================== */
+      /* SCENE 3 — SKILLS (4.5 → 7s) */
+      /* ====================================================== */
+      const t3 = 4.5;
+      tl.fromTo("#s3-num", { opacity: 0, scale: 0.6, rotation: -10 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)" }, t3 + 0.05);
+      tl.fromTo("#s3-suf", { opacity: 0, letterSpacing: "0.05em" }, { opacity: 1, letterSpacing: "0.4em", duration: 0.55, ease: "power2.out" }, t3 + 0.15);
+      // Tiles flip in with stagger — different direction per tile
+      const tiles = ["#s3-t1", "#s3-t2", "#s3-t3", "#s3-t4", "#s3-t5", "#s3-t6"];
+      tiles.forEach((sel, i) => {
+        tl.fromTo(sel,
+          { opacity: 0, scale: 0.4, rotation: i % 2 ? 12 : -12 },
+          { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(1.8)" },
+          t3 + 0.30 + i * 0.06);
+      });
+      // The "lit" custom tile pulses to highlight
+      tl.to("#s3-t5", { scale: 1.06, duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: 1 }, t3 + 1.3);
+      // Title + claim — slide from right
+      tl.fromTo("#s3-title", { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, t3 + 0.95);
+      tl.fromTo("#s3-claim", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.55, ease: "power2.out" }, t3 + 1.15);
+
+      /* ====================================================== */
+      /* SCENE 4 — DESIGN (7 → 9.5s) */
+      /* ====================================================== */
+      const t4 = 7;
+      tl.fromTo("#s4-num", { opacity: 0, y: -50 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, t4 + 0.05);
+      tl.fromTo("#s4-suf", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t4 + 0.15);
+      // Frame draws in
+      tl.fromTo("#s4-frame", { opacity: 0, scale: 0.85, y: 60 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.3)" }, t4 + 0.25);
+      // Blocks fill in (animating height)
+      tl.fromTo("#s4-fill1", { height: "0%" }, { height: "70%", duration: 0.9, ease: "power2.inOut" }, t4 + 0.7);
+      tl.fromTo("#s4-fill2", { height: "0%" }, { height: "85%", duration: 0.85, ease: "power2.inOut" }, t4 + 0.95);
+      // Subtle floating on the frame
+      tl.to("#s4-frame", { y: -12, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: 1 }, t4 + 1.0);
+      // Title + claim
+      tl.fromTo("#s4-title", { opacity: 0, y: 40, letterSpacing: "0.1em" }, { opacity: 1, y: 0, letterSpacing: "-0.045em", duration: 0.55, ease: "expo.out" }, t4 + 0.85);
+      tl.fromTo("#s4-claim", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t4 + 1.05);
+
+      /* ====================================================== */
+      /* SCENE 5 — AGENT WEB (9.5 → 12.5s) — the peak */
+      /* ====================================================== */
+      const t5 = 9.5;
+      tl.fromTo("#s5-num", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, t5 + 0.05);
+      tl.fromTo("#s5-suf", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.55, ease: "power2.out" }, t5 + 0.15);
+      // Browser drops in with a slight tilt
+      tl.fromTo("#s5-browser", { opacity: 0, y: 80, rotationX: 12, transformPerspective: 1200 }, { opacity: 1, y: 0, rotationX: 0, duration: 0.65, ease: "power3.out" }, t5 + 0.25);
+      // URL bar reveal
+      tl.fromTo("#s5-url", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, t5 + 0.65);
+      // Result rows cascade
+      tl.fromTo("#s5-r1", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, t5 + 0.85);
+      tl.fromTo("#s5-r2", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, t5 + 0.95);
+      tl.fromTo("#s5-r3", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, t5 + 1.05);
+      // Cursor: single tween fades in while gliding to the hit row (no property collisions)
+      tl.fromTo("#s5-cursor", { opacity: 0, x: 700, y: 100 }, { opacity: 1, x: 350, y: 270, duration: 0.95, ease: "power2.inOut" }, t5 + 1.15);
+      // Click pulse on the hit row's icon (separate element — no opacity collision)
+      tl.fromTo("#s5-r2 .result-icon", { scale: 1 }, { scale: 1.25, duration: 0.18, ease: "power2.in", yoyo: true, repeat: 1 }, t5 + 2.15);
+      // Title + claim
+      tl.fromTo("#s5-title", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.55, ease: "expo.out" }, t5 + 1.0);
+      tl.fromTo("#s5-claim", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t5 + 1.2);
+
+      /* ====================================================== */
+      /* SCENE 6 — CTA (12.5 → 15s) — final scene, exits allowed */
+      /* ====================================================== */
+      const t6 = 12.5;
+      tl.fromTo("#s6-pre", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t6 + 0.1);
+      tl.fromTo("#s6-h1", { opacity: 0, y: 80, scale: 1.2 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "expo.out" }, t6 + 0.30);
+      tl.fromTo("#s6-h2", { opacity: 0, x: -100 }, { opacity: 1, x: 0, duration: 0.55, ease: "power3.out" }, t6 + 0.55);
+      tl.fromTo("#s6-h3", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, t6 + 0.85);
+      tl.fromTo("#s6-rule", { width: 0 }, { width: 200, duration: 0.55, ease: "power3.inOut" }, t6 + 1.1);
+      tl.fromTo("#s6-url", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t6 + 1.4);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
