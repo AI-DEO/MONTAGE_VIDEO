@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Track"; src: url("fonts/Track-Regular.otf") format("opentype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Oswald"; src: url("fonts/Oswald-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Oswald"; src: url("fonts/Oswald-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Light.ttf") format("truetype"); font-weight: 300; font-style: normal; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Semibold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: block; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #f6f3ec;
+        color: #1f262a;
+        font-family: "Open Sans", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      :root {
+        --paper: #f6f3ec;
+        --ink: #1f262a;
+        --orange: #fc8902;
+        --turquoise: #26c2b7;
+        --turquoise-300: #47cec8;
+        --coral: #e8433a;
+        --dark-700: #1f262a;
+        --dark-600: #2c363b;
+        --dark-500: #3e4a52;
+        --dark-400: #636d75;
+        --dark-300: #8b9299;
+        --dark-200: #b2b7bc;
+        --gradient-brand: linear-gradient(135deg, #26c2b7 0%, #fc8902 60%, #e8433a 100%);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45);
+        --card-shadow: 0 12px 40px rgba(31, 38, 42, 0.14);
+      }
+
+      /* ============================================================ */
+      /* PERSISTENT BACKGROUND (full-frame, faithful to the static ad) */
+      /* ============================================================ */
+      .bg-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: var(--paper); }
+      .bg-stripe {
+        position: absolute; top: 0; left: 0; right: 0; height: 10px;
+        background: var(--gradient-brand); z-index: 1;
+      }
+      .bg-glow-orange {
+        position: absolute; top: -260px; right: -200px;
+        width: 820px; height: 820px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(252,137,2,0.26), rgba(232,67,58,0.16) 55%, rgba(252,137,2,0) 75%);
+        filter: blur(10px);
+      }
+      .bg-glow-turq {
+        position: absolute; bottom: -260px; right: -240px;
+        width: 880px; height: 880px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(38,194,183,0.28), rgba(38,194,183,0) 70%);
+        filter: blur(20px);
+      }
+      .bg-glow-turq-2 {
+        position: absolute; bottom: -300px; left: -260px;
+        width: 760px; height: 760px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(38,194,183,0.16), rgba(38,194,183,0) 70%);
+        filter: blur(24px);
+      }
+
+      /* PERSISTENT AIDEO LOGO — top-left, inside safe zone (y >= 250) */
+      .brand-logo {
+        position: absolute;
+        top: 280px;
+        left: 70px;
+        width: 150px;
+        height: 150px;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        z-index: 6;
+      }
+      .brand-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+      /* ============================================================ */
+      /* GENERIC SCENE — content kept within safe zone 250–1580px      */
+      /* ============================================================ */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 320px 70px 380px;
+        z-index: 3;
+      }
+
+      /* --- SEQ1 — Question accroche --- */
+      #s1 .accroche {
+        font-family: "Open Sans", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 92px;
+        line-height: 1.25;
+        color: var(--ink);
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 18px 22px;
+      }
+      #s1 .word { display: inline-block; }
+      #s1 .icon-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: var(--orange);
+        color: #fff;
+        font-size: 46px;
+        line-height: 1;
+        box-shadow: 0 8px 24px rgba(252, 137, 2, 0.4);
+        flex-shrink: 0;
+      }
+
+      /* --- SEQ2 — Title + date --- */
+      #s2 .title {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 158px;
+        line-height: 0.94;
+        letter-spacing: -0.015em;
+        text-transform: uppercase;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      #s2 .title .ia {
+        background: var(--gradient-brand);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      #s2 .subtitle {
+        font-family: "Open Sans", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 40px;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 44px;
+        white-space: nowrap;
+      }
+      #s2 .subtitle .sep { width: 12px; height: 12px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+      #s2 .date-badge {
+        margin-top: 60px;
+        display: inline-flex;
+        align-items: center;
+        padding: 26px 54px;
+        border-radius: 24px;
+        background: var(--dark-700);
+        box-shadow: var(--shadow-md);
+      }
+      #s2 .date-badge .val {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 70px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #fff;
+        line-height: 1;
+      }
+      #s2 .date-badge .val sup { font-size: 0.45em; vertical-align: 0.65em; }
+
+      /* --- SEQ3 — Photo + Format block --- */
+      #s3 .portrait-wrap { position: relative; width: 460px; height: 460px; margin-bottom: 60px; }
+      #s3 .portrait-shadow {
+        position: absolute; inset: -30px; border-radius: 50%;
+        background: var(--gradient-brand); filter: blur(34px); opacity: 0.5;
+      }
+      #s3 .portrait-ring { position: absolute; inset: -12px; border-radius: 50%; background: var(--gradient-brand); }
+      #s3 .portrait {
+        position: absolute; inset: 0; border-radius: 50%;
+        overflow: hidden; background: #fff;
+        border: 10px solid var(--paper); box-sizing: border-box;
+      }
+      #s3 .portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+
+      .info-card {
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: var(--card-shadow);
+        padding: 44px 52px;
+        text-align: left;
+        width: 880px;
+      }
+      .info-card .label {
+        font-family: "Open Sans", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 25px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--dark-400);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .info-card .label::before { content: ""; width: 28px; height: 4px; border-radius: 2px; background: var(--orange); flex-shrink: 0; }
+      .info-card.turq .label::before { background: var(--turquoise); }
+      .info-card .big {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 70px;
+        line-height: 1.08;
+        text-transform: uppercase;
+        letter-spacing: -0.005em;
+        color: var(--ink);
+        margin-top: 14px;
+      }
+      .info-card .sub {
+        font-family: "Open Sans", system-ui, sans-serif;
+        font-weight: 400;
+        font-size: 32px;
+        line-height: 1.3;
+        color: var(--dark-500);
+        margin-top: 14px;
+      }
+
+      /* --- SEQ4 — Programme + italic --- */
+      #s4 .prog-card { display: flex; align-items: center; gap: 36px; }
+      #s4 .prog-content { flex: 1; min-width: 0; }
+      #s4 .logos { display: flex; flex-direction: column; gap: 22px; flex-shrink: 0; }
+      #s4 .logo-badge {
+        width: 104px; height: 104px; border-radius: 22px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      }
+      #s4 .logo-badge.gpt { background: #fff; border: 2px solid rgba(0, 0, 0, 0.08); }
+      #s4 .logo-badge.claude { background: #d97757; }
+      #s4 .logo-badge img { width: 60px; height: 60px; object-fit: contain; }
+      #s4 .logo-badge.claude img { filter: brightness(0) invert(1); }
+      #s4 .tagline {
+        font-family: "Open Sans", system-ui, sans-serif;
+        font-weight: 600;
+        font-style: italic;
+        font-size: 38px;
+        line-height: 1.4;
+        color: var(--dark-700);
+        text-align: center;
+        margin-top: 52px;
+        max-width: 900px;
+      }
+
+      /* --- SEQ5 — Double CTA + lien bio --- */
+      #s5 .cta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 26px;
+        width: 920px;
+      }
+      #s5 .cta-card {
+        padding: 40px 28px;
+        background: var(--dark-700);
+        border-radius: 26px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 210px;
+      }
+      #s5 .cta-card::before {
+        content: ""; position: absolute; inset: 0;
+        background: var(--gradient-brand); opacity: 0.09;
+      }
+      #s5 .cta-text {
+        position: relative; z-index: 1;
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #fff;
+        line-height: 1.15;
+      }
+      #s5 .cta-text .line1 { font-size: 56px; display: block; }
+      #s5 .cta-text .line1 sup { font-size: 0.5em; vertical-align: 0.6em; }
+      #s5 .cta-text .line2 { font-size: 32px; display: block; color: var(--turquoise-300); margin-top: 14px; }
+      #s5 .cta-text.single .line1 { font-size: 50px; }
+      #s5 .bio {
+        margin-top: 60px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 44px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--ink);
+      }
+      #s5 .bio .arrow { color: var(--orange); font-size: 50px; line-height: 1; }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="30"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- ===================== PERSISTENT BACKGROUND ===================== -->
+      <div class="bg-layer">
+        <div class="bg-glow-orange" id="bg-go"></div>
+        <div class="bg-glow-turq" id="bg-gt"></div>
+        <div class="bg-glow-turq-2" id="bg-gt2"></div>
+        <div class="bg-stripe"></div>
+      </div>
+
+      <!-- PERSISTENT AIDEO LOGO -->
+      <div class="brand-logo" id="brand-logo">
+        <img src="assets/logo-aideo-gradient.png" alt="AIDEO" crossorigin="anonymous" />
+      </div>
+
+      <!-- ===================== SEQ 1 — QUESTION (0 → 3s) ===================== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="3" data-track-index="1">
+        <div class="accroche" id="s1-accroche">
+          <span class="icon-badge" id="s1-clock">⏱</span>
+          <span class="word">Combien</span>
+          <span class="word">l'IA</span>
+          <span class="word">vous</span>
+          <span class="word">fait-elle</span>
+          <span class="word">réellement</span>
+          <span class="word">gagner&nbsp;?</span>
+          <span class="icon-badge" id="s1-euro">€</span>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 2 — TITRE + DATE (3 → 8s) ===================== -->
+      <div id="s2" class="clip scene" data-start="3" data-duration="5" data-track-index="1">
+        <div class="title" id="s2-title">Formation <span class="ia">IA</span></div>
+        <div class="subtitle" id="s2-sub">
+          <span>Présentiel</span>
+          <span class="sep"></span>
+          <span>La Teste-de-Buch</span>
+          <span class="sep"></span>
+          <span>1 jour</span>
+        </div>
+        <div class="date-badge" id="s2-badge">
+          <span class="val">1<sup>er</sup>&nbsp;Juin</span>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 3 — PHOTO + FORMAT (8 → 16s) ===================== -->
+      <div id="s3" class="clip scene" data-start="8" data-duration="8" data-track-index="1">
+        <div class="portrait-wrap" id="s3-portrait">
+          <div class="portrait-shadow"></div>
+          <div class="portrait-ring"></div>
+          <div class="portrait"><img src="assets/frederic-ruault.jpg" alt="Frédéric Ruault" crossorigin="anonymous" id="s3-photo" data-layout-allow-overflow /></div>
+        </div>
+        <div class="info-card" id="s3-card">
+          <div class="label">Format</div>
+          <div class="big">10 participants max</div>
+          <div class="sub">Accompagnement personnalisé</div>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 4 — PROGRAMME + ITALIQUE (16 → 24s) ===================== -->
+      <div id="s4" class="clip scene" data-start="16" data-duration="8" data-track-index="1">
+        <div class="info-card turq prog-card" id="s4-card">
+          <div class="prog-content">
+            <div class="label">Programme</div>
+            <div class="big">Chat GPT &amp; Claude</div>
+            <div class="big">Niveau 1</div>
+            <div class="sub">8h30 — 16h30</div>
+          </div>
+          <div class="logos">
+            <div class="logo-badge gpt"><img src="assets/logo-chatgpt.png" alt="ChatGPT" crossorigin="anonymous" /></div>
+            <div class="logo-badge claude"><img src="assets/claude-logo.svg" alt="Claude" crossorigin="anonymous" /></div>
+          </div>
+        </div>
+        <div class="tagline" id="s4-tag">Interface, personnalisation, outils avancés, tout appliqué à votre réalité terrain</div>
+      </div>
+
+      <!-- ===================== SEQ 5 — DOUBLE CTA + BIO (24 → 30s) ===================== -->
+      <div id="s5" class="clip scene" data-start="24" data-duration="6" data-track-index="1">
+        <div class="cta-grid">
+          <div class="cta-card" id="s5-c1">
+            <div class="cta-text">
+              <span class="line1">100<sup>%</sup> Finançable</span>
+              <span class="line2">OPCO / FAF</span>
+            </div>
+          </div>
+          <div class="cta-card" id="s5-c2">
+            <div class="cta-text single">
+              <span class="line1">Entretien préalable</span>
+            </div>
+          </div>
+        </div>
+        <div class="bio" id="s5-bio"><span>Lien en bio</span><span class="arrow">↓</span></div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* ---------- Persistent ambient (full 30s) — subtle, per AIDEO charter ---------- */
+      tl.fromTo("#bg-go", { scale: 1.0, opacity: 0.85 }, { scale: 1.12, opacity: 1, duration: 7.5, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+      tl.fromTo("#bg-gt", { scale: 1.0 }, { scale: 1.1, duration: 9, ease: "sine.inOut", yoyo: true, repeat: 2 }, 0.5);
+      tl.fromTo("#brand-logo", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.2);
+
+      /* ===================== SEQ 1 — QUESTION (0 → 3s) ===================== */
+      tl.fromTo("#s1-clock", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 0.15);
+      tl.fromTo("#s1-accroche .word",
+        { opacity: 0, y: 28 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.13 }, 0.35);
+      tl.fromTo("#s1-euro", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 1.30);
+
+      /* ===================== SEQ 2 — TITRE + DATE (3 → 8s) ===================== */
+      const t2 = 3;
+      tl.fromTo("#s2-title", { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t2 + 0.15);
+      tl.fromTo("#s2-sub", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t2 + 0.55);
+      tl.fromTo("#s2-badge", { opacity: 0, y: 60, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, t2 + 0.95);
+
+      /* ===================== SEQ 3 — PHOTO + FORMAT (8 → 16s) ===================== */
+      const t3 = 8;
+      // Parent entrance + child Ken Burns split (load-bearing GSAP rule)
+      tl.fromTo("#s3-portrait", { opacity: 0, scale: 0.9, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: "power3.out" }, t3 + 0.15);
+      tl.fromTo("#s3-photo", { scale: 1.0 }, { scale: 1.06, duration: 7.7, ease: "none" }, t3 + 0.15);
+      tl.fromTo("#s3-card", { opacity: 0, y: 90 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t3 + 0.70);
+
+      /* ===================== SEQ 4 — PROGRAMME + ITALIQUE (16 → 24s) ===================== */
+      const t4 = 16;
+      tl.fromTo("#s4-card", { opacity: 0, y: 90 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t4 + 0.15);
+      tl.fromTo("#s4-card .logo-badge",
+        { opacity: 0, x: 40 },
+        { opacity: 1, x: 0, duration: 0.5, ease: "power2.out", stagger: 0.14 }, t4 + 0.55);
+      tl.fromTo("#s4-tag", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, t4 + 1.05);
+
+      /* ===================== SEQ 5 — DOUBLE CTA + BIO (24 → 30s) ===================== */
+      const t5 = 24;
+      tl.fromTo("#s5-c1", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, t5 + 0.20);
+      tl.fromTo("#s5-c2", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, t5 + 0.40);
+      tl.fromTo("#s5-bio", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t5 + 0.85);
+      tl.fromTo("#s5-bio .arrow", { y: 0 }, { y: 12, duration: 0.7, ease: "sine.inOut", yoyo: true, repeat: 4 }, t5 + 1.5);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
