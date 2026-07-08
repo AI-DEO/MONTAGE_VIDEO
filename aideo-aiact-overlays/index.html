@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Track"; src: url("fonts/Track-Regular.otf") format("opentype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Oswald"; src: url("fonts/Oswald-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Oswald"; src: url("fonts/Oswald-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Semibold.ttf") format("truetype"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: transparent;
+        color: #ffffff;
+        font-family: "Open Sans", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      :root {
+        --ink: #1f262a;
+        --bg-deep: #141a1d;
+        --fg: #ffffff;
+        --fg-secondary: #b2b7bc;
+        --fg-muted: #8b9299;
+        --orange: #fc8902;
+        --turquoise: #26c2b7;
+        --coral: #e8433a;
+        --gradient-brand: linear-gradient(135deg, #26c2b7 0%, #fc8902 60%, #e8433a 100%);
+      }
+
+      /* Persistent small AIDEO logo, top-left inside safe zone */
+      .brand-logo {
+        position: absolute;
+        top: 280px;
+        left: 60px;
+        width: 118px;
+        height: 118px;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+        z-index: 8;
+      }
+      .brand-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+      /* Generic scene container — content within safe zone */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 320px 60px 400px;
+        z-index: 3;
+      }
+
+      /* --- SEQ 1 (opening carton "2 août 2026") --- */
+      #s1 { justify-content: flex-start; padding-top: 470px; }
+      #s1 .card {
+        background: var(--ink);
+        border-radius: 26px;
+        padding: 46px 60px;
+        border: 2px solid rgba(252, 137, 2, 0.35);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(252, 137, 2, 0.18);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #s1 .tag {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.4em;
+        color: var(--turquoise);
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      #s1 .date {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 200px;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        color: var(--orange);
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      #s1 .year {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 130px;
+        line-height: 1;
+        letter-spacing: 0.06em;
+        color: var(--fg);
+        margin-top: 8px;
+      }
+      #s1 .sub {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+        font-size: 26px;
+        color: var(--fg-secondary);
+        margin-top: 26px;
+        letter-spacing: 0.02em;
+      }
+
+      /* --- SEQ 2 (DONNÉES SENSIBLES) --- */
+      #s2 { justify-content: flex-start; padding-top: 460px; }
+      #s2 .card {
+        background: var(--bg-deep);
+        border: 2px solid var(--coral);
+        border-radius: 22px;
+        padding: 44px 46px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(232, 67, 58, 0.28);
+        text-align: left;
+        max-width: 900px;
+      }
+      #s2 .ds-tag {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.3em;
+        color: var(--coral);
+        text-transform: uppercase;
+      }
+      #s2 .ds-title {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 76px;
+        line-height: 1.0;
+        letter-spacing: -0.01em;
+        color: var(--fg);
+        text-transform: uppercase;
+        margin-top: 12px;
+      }
+      #s2 .ds-list {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      #s2 .ds-item {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+        font-size: 34px;
+        line-height: 1.25;
+        color: var(--fg);
+      }
+      #s2 .ds-bullet { color: var(--coral); font-weight: 700; flex-shrink: 0; }
+
+      /* --- SEQ 3 (CTA final) --- */
+      #s3 { justify-content: center; }
+      #s3 .cta {
+        background: var(--ink);
+        border-radius: 28px;
+        padding: 52px 60px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(252, 137, 2, 0.2);
+        border: 2px solid rgba(252, 137, 2, 0.35);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 960px;
+      }
+      #s3 .greet {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 400;
+        font-size: 30px;
+        color: var(--fg-secondary);
+        margin-bottom: 14px;
+      }
+      #s3 .name {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 130px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--fg);
+        text-transform: uppercase;
+      }
+      #s3 .rule { width: 220px; height: 5px; background: var(--gradient-brand); border-radius: 3px; margin-top: 24px; }
+      #s3 .buttons {
+        margin-top: 34px;
+        display: flex;
+        gap: 20px;
+      }
+      #s3 .btn {
+        padding: 24px 34px;
+        border-radius: 18px;
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 32px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      #s3 .btn.o { background: var(--orange); color: #fff; }
+      #s3 .btn.g { background: transparent; color: var(--fg); border: 2px solid var(--fg); }
+      #s3 .handle {
+        margin-top: 26px;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 38px;
+        color: var(--turquoise);
+        letter-spacing: 0.02em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="65"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Persistent AIDEO logo -->
+      <div class="brand-logo" id="brand-logo">
+        <img src="assets/logo-aideo-gradient.png" alt="AIDEO" crossorigin="anonymous" />
+      </div>
+
+      <!-- ===================== SEQ 1 — "2 août 2026" (0 → 5s) ===================== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="5" data-track-index="1">
+        <div class="card" id="s1-card">
+          <div class="tag" id="s1-tag">AI Act européen</div>
+          <div class="date" id="s1-date">2 Août</div>
+          <div class="year" id="s1-year">2026</div>
+          <div class="sub" id="s1-sub">Obligatoire.</div>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 2 — DONNÉES SENSIBLES (37 → 46s) ===================== -->
+      <div id="s2" class="clip scene" data-start="37" data-duration="9" data-track-index="1">
+        <div class="card" id="s2-card">
+          <div class="ds-tag">Données sensibles</div>
+          <div class="ds-title">Ce qu'il faut repérer</div>
+          <div class="ds-list">
+            <div class="ds-item" id="s2-d1"><span class="ds-bullet">·</span><span>Santé</span></div>
+            <div class="ds-item" id="s2-d2"><span class="ds-bullet">·</span><span>Origine</span></div>
+            <div class="ds-item" id="s2-d3"><span class="ds-bullet">·</span><span>Opinions politiques ou religieuses</span></div>
+            <div class="ds-item" id="s2-d4"><span class="ds-bullet">·</span><span>Orientation sexuelle</span></div>
+            <div class="ds-item" id="s2-d5"><span class="ds-bullet">·</span><span>Appartenance syndicale</span></div>
+            <div class="ds-item" id="s2-d6"><span class="ds-bullet">·</span><span>Biométrie (empreinte, reconnaissance faciale)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 3 — CTA final (60 → 65s) ===================== -->
+      <div id="s3" class="clip scene" data-start="60" data-duration="5" data-track-index="1">
+        <div class="cta" id="s3-cta">
+          <div class="greet" id="s3-greet">Je m'appelle</div>
+          <div class="name" id="s3-name">Frédéric</div>
+          <div class="rule" id="s3-rule"></div>
+          <div class="buttons">
+            <div class="btn o" id="s3-b1">Suis-moi</div>
+            <div class="btn g" id="s3-b2">Lien en bio ↓</div>
+          </div>
+          <div class="handle" id="s3-handle">@ai-deo</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* Persistent logo (fade in early, out at very end) */
+      tl.fromTo("#brand-logo", { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.35);
+
+      /* SEQ 1 — 0 → 5s */
+      tl.fromTo("#s1-card", { opacity: 0, y: 60, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: "power3.out" }, 0.25);
+      tl.fromTo("#s1-tag", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.45);
+      tl.fromTo("#s1-date", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 0.60);
+      tl.fromTo("#s1-year", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.90);
+      tl.fromTo("#s1-sub", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 1.20);
+      // Exit at end of scene (final scene rule doesn't apply here — this is an overlay layer where each carton exits cleanly)
+      tl.to("#s1-card", { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, 4.4);
+
+      /* SEQ 2 — 37 → 46s (DONNÉES SENSIBLES visible ~5-6s effective) */
+      tl.fromTo("#s2-card", { opacity: 0, y: 70, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }, 37.15);
+      tl.fromTo("#s2-d1", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 37.55);
+      tl.fromTo("#s2-d2", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 37.75);
+      tl.fromTo("#s2-d3", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 37.95);
+      tl.fromTo("#s2-d4", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 38.15);
+      tl.fromTo("#s2-d5", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 38.35);
+      tl.fromTo("#s2-d6", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 38.55);
+      // Exit
+      tl.to("#s2-card", { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, 45.3);
+
+      /* SEQ 3 — 60 → 65s (CTA) */
+      tl.fromTo("#s3-cta", { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }, 60.15);
+      tl.fromTo("#s3-greet", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 60.4);
+      tl.fromTo("#s3-name", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 60.55);
+      tl.fromTo("#s3-rule", { width: 0 }, { width: 220, duration: 0.5, ease: "power3.inOut" }, 60.95);
+      tl.fromTo("#s3-b1", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 61.20);
+      tl.fromTo("#s3-b2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 61.40);
+      tl.fromTo("#s3-handle", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 61.70);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

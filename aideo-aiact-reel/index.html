@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Track"; src: url("fonts/Track-Regular.otf") format("opentype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Oswald"; src: url("fonts/Oswald-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Oswald"; src: url("fonts/Oswald-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Light.ttf") format("truetype"); font-weight: 300; font-style: normal; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Semibold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: block; }
+      @font-face { font-family: "Open Sans"; src: url("fonts/OpenSans-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: block; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #1f262a;
+        color: #ffffff;
+        font-family: "Open Sans", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      :root {
+        --bg: #1f262a;
+        --bg-surface: #2c363b;
+        --bg-elevated: #28343a;
+        --bg-deep: #141a1d;
+        --fg: #ffffff;
+        --fg-secondary: #b2b7bc;
+        --fg-muted: #8b9299;
+        --orange: #fc8902;
+        --turquoise: #26c2b7;
+        --turquoise-300: #47cec8;
+        --coral: #e8433a;
+        --gradient-brand: linear-gradient(135deg, #26c2b7 0%, #fc8902 60%, #e8433a 100%);
+        --border-subtle: rgba(255,255,255,0.08);
+        --border-default: rgba(255,255,255,0.15);
+      }
+
+      /* PERSISTENT BACKGROUND */
+      .bg-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: var(--bg); }
+      .bg-stripe {
+        position: absolute; top: 0; left: 0; right: 0; height: 10px;
+        background: var(--gradient-brand); z-index: 1;
+      }
+      .bg-glow-o {
+        position: absolute; top: -260px; right: -240px;
+        width: 860px; height: 860px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(252,137,2,0.32), rgba(232,67,58,0.12) 55%, rgba(252,137,2,0) 75%);
+        filter: blur(30px);
+      }
+      .bg-glow-t {
+        position: absolute; bottom: -280px; left: -260px;
+        width: 840px; height: 840px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(38,194,183,0.24), rgba(38,194,183,0) 70%);
+        filter: blur(34px);
+      }
+
+      /* AIDEO LOGO — persistent, top-left, inside safe zone */
+      .brand-logo {
+        position: absolute;
+        top: 280px;
+        left: 60px;
+        width: 130px;
+        height: 130px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        z-index: 8;
+      }
+      .brand-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+      /* PROGRESS RULE — bottom edge, above dead zone */
+      .prog-track {
+        position: absolute;
+        left: 60px; right: 60px;
+        bottom: 360px;
+        height: 4px;
+        background: rgba(255,255,255,0.10);
+        z-index: 6;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .prog-fill {
+        position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+        background: var(--gradient-brand);
+      }
+
+      /* GENERIC SCENE — inside safe zone 250–1580 */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 320px 60px 400px;
+        z-index: 3;
+      }
+
+      /* --- SEQ1 — 2 AOÛT 2026 hero --- */
+      #s1 .hero-tag {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: 0.5em;
+        color: var(--turquoise);
+        text-transform: uppercase;
+        margin-bottom: 44px;
+      }
+      #s1 .hero-date {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 300px;
+        line-height: 0.9;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+        color: var(--orange);
+        white-space: nowrap;
+      }
+      #s1 .hero-year {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 180px;
+        line-height: 1;
+        letter-spacing: 0.04em;
+        color: var(--fg);
+        margin-top: -12px;
+      }
+      #s1 .hero-sub {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 300;
+        font-size: 42px;
+        line-height: 1.35;
+        color: var(--fg-secondary);
+        margin-top: 40px;
+        max-width: 780px;
+      }
+
+      /* --- SEQ2 — "obligatoire" --- */
+      #s2 .kicker {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 30px;
+        letter-spacing: 0.36em;
+        color: var(--turquoise);
+        text-transform: uppercase;
+        margin-bottom: 40px;
+      }
+      #s2 .big-line-1 {
+        font-family: "Oswald", sans-serif;
+        font-weight: 400;
+        font-size: 130px;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        color: var(--fg);
+        text-transform: uppercase;
+      }
+      #s2 .big-line-2 {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 200px;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        color: var(--orange);
+        text-transform: uppercase;
+        margin-top: 6px;
+      }
+      #s2 .split {
+        margin-top: 68px;
+        display: flex;
+        gap: 24px;
+        align-items: stretch;
+        width: 920px;
+      }
+      #s2 .split-chip {
+        flex: 1;
+        padding: 34px 30px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-top: 3px solid var(--orange);
+        border-radius: 16px;
+        text-align: center;
+      }
+      #s2 .split-chip.strike { border-top-color: var(--fg-muted); }
+      #s2 .split-chip .lbl {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.24em;
+        color: var(--fg-muted);
+        text-transform: uppercase;
+      }
+      #s2 .split-chip .val {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 68px;
+        color: var(--fg);
+        text-transform: uppercase;
+        margin-top: 14px;
+        letter-spacing: -0.01em;
+      }
+      #s2 .split-chip.strike .val { color: var(--fg-muted); text-decoration: line-through; text-decoration-thickness: 6px; }
+
+      /* --- SEQ3 — Tu es déployeur --- */
+      #s3 .badge {
+        display: inline-block;
+        padding: 16px 32px;
+        background: var(--orange);
+        color: #fff;
+        border-radius: 999px;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 24px rgba(252,137,2,0.35);
+      }
+      #s3 .big {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 200px;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        color: var(--fg);
+        text-transform: uppercase;
+      }
+      #s3 .big em { font-style: normal; color: var(--orange); }
+      #s3 .sub {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 300;
+        font-size: 40px;
+        line-height: 1.4;
+        color: var(--fg-secondary);
+        margin-top: 24px;
+        max-width: 820px;
+      }
+      #s3 .chips {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 48px;
+        width: 820px;
+      }
+      #s3 .chip {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 22px 30px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        text-align: left;
+      }
+      #s3 .chip-dot {
+        width: 14px; height: 14px; border-radius: 50%;
+        background: var(--orange); flex-shrink: 0;
+        box-shadow: 0 0 12px rgba(252, 137, 2, 0.55);
+      }
+      #s3 .chip-txt {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 32px;
+        color: var(--fg);
+        letter-spacing: 0.01em;
+      }
+
+      /* --- SEQ4 — ChatGPT/Claude reassurance --- */
+      #s4 .kicker {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: 0.34em;
+        color: var(--turquoise);
+        text-transform: uppercase;
+        margin-bottom: 34px;
+      }
+      #s4 .big {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 156px;
+        line-height: 0.95;
+        letter-spacing: -0.015em;
+        color: var(--fg);
+        text-transform: uppercase;
+      }
+      #s4 .big em { font-style: normal; color: var(--turquoise); }
+      #s4 .card {
+        margin-top: 44px;
+        padding: 36px 44px;
+        background: var(--bg-surface);
+        border: 1px solid rgba(38, 194, 183, 0.35);
+        border-top: 3px solid var(--turquoise);
+        border-radius: 18px;
+        width: 900px;
+      }
+      #s4 .card-l1 {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 300;
+        font-size: 36px;
+        line-height: 1.4;
+        color: var(--fg-secondary);
+        text-align: left;
+      }
+      #s4 .card-l1 strong { color: var(--fg); font-weight: 700; }
+      #s4 .warn {
+        margin-top: 40px;
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 76px;
+        color: var(--orange);
+        text-transform: uppercase;
+        letter-spacing: -0.01em;
+      }
+
+      /* --- SEQ5 — Checklist 4 points --- */
+      #s5 .kicker {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: 0.36em;
+        color: var(--orange);
+        text-transform: uppercase;
+        margin-bottom: 22px;
+      }
+      #s5 .header {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 108px;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        color: var(--fg);
+        text-transform: uppercase;
+        margin-bottom: 60px;
+      }
+      #s5 .list {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        width: 940px;
+      }
+      #s5 .item {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        padding: 30px 34px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        text-align: left;
+      }
+      #s5 .item.active {
+        background: var(--bg-elevated);
+        border: 1px solid var(--orange);
+        box-shadow: 0 0 30px rgba(252, 137, 2, 0.25);
+      }
+      #s5 .item-num {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 74px;
+        color: var(--turquoise);
+        line-height: 1;
+        flex-shrink: 0;
+        width: 96px;
+      }
+      #s5 .item.active .item-num { color: var(--orange); }
+      #s5 .item-txt {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+        font-size: 32px;
+        line-height: 1.3;
+        color: var(--fg);
+      }
+      #s5 .item-txt strong { font-weight: 800; color: var(--turquoise); }
+      #s5 .item.active .item-txt strong { color: var(--orange); }
+
+      /* SEQ5 — DONNÉES SENSIBLES callout */
+      #ds-callout {
+        position: absolute;
+        left: 60px;
+        right: 60px;
+        top: 500px;
+        z-index: 7;
+        background: var(--bg-deep);
+        border: 2px solid var(--coral);
+        border-radius: 20px;
+        padding: 40px 44px;
+        text-align: left;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(232, 67, 58, 0.28);
+      }
+      #ds-callout .ds-tag {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.28em;
+        color: var(--coral);
+        text-transform: uppercase;
+      }
+      #ds-callout .ds-title {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 74px;
+        line-height: 1.0;
+        letter-spacing: -0.01em;
+        color: var(--fg);
+        text-transform: uppercase;
+        margin-top: 10px;
+      }
+      #ds-callout .ds-list {
+        margin-top: 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      #ds-callout .ds-item {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+        font-size: 32px;
+        line-height: 1.25;
+        color: var(--fg);
+      }
+      #ds-callout .ds-bullet {
+        color: var(--coral);
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      /* --- SEQ6 — savoir + prouver --- */
+      #s6 .kicker {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: 0.4em;
+        color: var(--turquoise);
+        text-transform: uppercase;
+        margin-bottom: 70px;
+      }
+      #s6 .pair {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+        padding-top: 20px;
+      }
+      #s6 .word {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 220px;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+      }
+      #s6 .word.a { color: var(--fg); }
+      #s6 .word.b { color: var(--orange); }
+      #s6 .plus {
+        font-family: "Oswald", sans-serif;
+        font-weight: 400;
+        font-size: 80px;
+        color: var(--turquoise);
+        line-height: 1;
+      }
+      #s6 .sub {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 300;
+        font-size: 38px;
+        line-height: 1.4;
+        color: var(--fg-secondary);
+        margin-top: 50px;
+        max-width: 880px;
+      }
+
+      /* --- SEQ7 — CTA --- */
+      #s7 .greet {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 400;
+        font-size: 34px;
+        color: var(--fg-secondary);
+        margin-bottom: 20px;
+      }
+      #s7 .name {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 168px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--fg);
+        text-transform: uppercase;
+      }
+      #s7 .role {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 300;
+        font-size: 36px;
+        line-height: 1.35;
+        color: var(--fg-secondary);
+        margin-top: 20px;
+        max-width: 860px;
+      }
+      #s7 .role strong { color: var(--fg); font-weight: 700; }
+      #s7 .cta-buttons {
+        margin-top: 60px;
+        display: flex;
+        gap: 26px;
+      }
+      #s7 .cta-btn {
+        padding: 32px 44px;
+        border-radius: 22px;
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;
+        font-size: 42px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        line-height: 1.1;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      }
+      #s7 .cta-btn.orange { background: var(--orange); color: #fff; }
+      #s7 .cta-btn.ghost { background: transparent; color: var(--fg); border: 2px solid var(--fg); }
+      #s7 .handle {
+        margin-top: 40px;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 700;
+        font-size: 46px;
+        color: var(--turquoise);
+        letter-spacing: 0.02em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="65"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- PERSISTENT BACKGROUND -->
+      <div class="bg-layer">
+        <div class="bg-glow-o" id="bg-go"></div>
+        <div class="bg-glow-t" id="bg-gt"></div>
+        <div class="bg-stripe"></div>
+      </div>
+
+      <!-- PERSISTENT AIDEO LOGO -->
+      <div class="brand-logo" id="brand-logo">
+        <img src="assets/logo-aideo-gradient.png" alt="AIDEO" crossorigin="anonymous" />
+      </div>
+
+      <!-- PERSISTENT PROGRESS BAR (above bottom dead zone) -->
+      <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+
+      <!-- ===================== SEQ 1 — 2 AOÛT 2026 (0 → 3s) ===================== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="3" data-track-index="1">
+        <div class="hero-tag" id="s1-tag">AI Act européen</div>
+        <div class="hero-date" id="s1-date">2 Août</div>
+        <div class="hero-year" id="s1-year">2026</div>
+        <div class="hero-sub" id="s1-sub">La date où ça devient obligatoire.</div>
+      </div>
+
+      <!-- ===================== SEQ 2 — OBLIGATOIRE (3 → 13s) ===================== -->
+      <div id="s2" class="clip scene" data-start="3" data-duration="10" data-track-index="1">
+        <div class="kicker" id="s2-kick">Le 2 août 2026</div>
+        <div class="big-line-1" id="s2-l1">L'AI Act devient</div>
+        <div class="big-line-2" id="s2-l2">Obligatoire</div>
+        <div class="split" id="s2-split">
+          <div class="split-chip strike" id="s2-cA"><div class="lbl">Pas dans</div><div class="val">1 an</div></div>
+          <div class="split-chip" id="s2-cB"><div class="lbl">Dans</div><div class="val">Quelques semaines</div></div>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 3 — Tu es déployeur (13 → 25s) ===================== -->
+      <div id="s3" class="clip scene" data-start="13" data-duration="12" data-track-index="1">
+        <div class="badge" id="s3-badge">Au sens de la loi</div>
+        <div class="big" id="s3-big">Tu es <em>déployeur</em></div>
+        <div class="sub" id="s3-sub">Même si tu ne t'en doutais pas.</div>
+        <div class="chips">
+          <div class="chip" id="s3-ch1"><div class="chip-dot"></div><div class="chip-txt">Logiciel RH boosté à l'IA</div></div>
+          <div class="chip" id="s3-ch2"><div class="chip-dot"></div><div class="chip-txt">Outil de scoring client</div></div>
+          <div class="chip" id="s3-ch3"><div class="chip-dot"></div><div class="chip-txt">Simple chatbot sur ton site</div></div>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 4 — ChatGPT/Claude (25 → 33s) ===================== -->
+      <div id="s4" class="clip scene" data-start="25" data-duration="8" data-track-index="1">
+        <div class="kicker" id="s4-kick">ChatGPT · Claude</div>
+        <div class="big" id="s4-big">Toi <em>aussi</em></div>
+        <div class="card" id="s4-card">
+          <div class="card-l1">Rédiger un email avec ChatGPT ?<br/><strong>Pas d'obligation supplémentaire au 2 août.</strong></div>
+        </div>
+        <div class="warn" id="s4-warn">Le vrai risque est ailleurs.</div>
+      </div>
+
+      <!-- ===================== SEQ 5 — Checklist (33 → 52s) ===================== -->
+      <div id="s5" class="clip scene" data-start="33" data-duration="19" data-track-index="1" data-layout-allow-occlusion>
+        <div class="kicker" id="s5-kick">Avant la rentrée</div>
+        <div class="header" id="s5-header">Ta checklist</div>
+        <div class="list">
+          <div class="item" id="s5-i1"><div class="item-num">01</div><div class="item-txt"><strong>Liste</strong> tes outils IA</div></div>
+          <div class="item" id="s5-i2"><div class="item-num">02</div><div class="item-txt"><strong>Vérifie</strong> s'ils touchent des données sensibles</div></div>
+          <div class="item" id="s5-i3"><div class="item-num">03</div><div class="item-txt"><strong>Garde une trace écrite</strong> des usages</div></div>
+          <div class="item" id="s5-i4"><div class="item-num">04</div><div class="item-txt">Décisions automatiques → <strong>transparence</strong></div></div>
+        </div>
+        <!-- DONNÉES SENSIBLES callout (only visible ~t=39-44 absolute → 6-11 in scene time) -->
+        <div id="ds-callout" data-layout-allow-occlusion data-layout-allow-overlap>
+          <div class="ds-tag">Données sensibles</div>
+          <div class="ds-title">Ce qu'il faut repérer</div>
+          <div class="ds-list">
+            <div class="ds-item"><span class="ds-bullet">·</span><span>Santé</span></div>
+            <div class="ds-item"><span class="ds-bullet">·</span><span>Origine</span></div>
+            <div class="ds-item"><span class="ds-bullet">·</span><span>Opinions politiques ou religieuses</span></div>
+            <div class="ds-item"><span class="ds-bullet">·</span><span>Orientation sexuelle</span></div>
+            <div class="ds-item"><span class="ds-bullet">·</span><span>Appartenance syndicale</span></div>
+            <div class="ds-item"><span class="ds-bullet">·</span><span>Biométrie (empreinte, reconnaissance faciale)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== SEQ 6 — Savoir + Prouver (52 → 60s) ===================== -->
+      <div id="s6" class="clip scene" data-start="52" data-duration="8" data-track-index="1">
+        <div class="kicker" id="s6-kick">Ce qui change vraiment</div>
+        <div class="pair">
+          <div class="word a" id="s6-w1">Savoir</div>
+          <div class="plus" id="s6-plus">+</div>
+          <div class="word b" id="s6-w2">Prouver</div>
+        </div>
+        <div class="sub" id="s6-sub">Gouvernance. Audit. Pas seulement des intentions.</div>
+      </div>
+
+      <!-- ===================== SEQ 7 — CTA (60 → 65s) ===================== -->
+      <div id="s7" class="clip scene" data-start="60" data-duration="5" data-track-index="1">
+        <div class="greet" id="s7-greet">Je m'appelle</div>
+        <div class="name" id="s7-name">Frédéric</div>
+        <div class="role" id="s7-role">J'accompagne les <strong>TPE / PME</strong> dans l'adoption de l'IA.</div>
+        <div class="cta-buttons">
+          <div class="cta-btn orange" id="s7-b1">Suis-moi</div>
+          <div class="cta-btn ghost" id="s7-b2">Lien en bio ↓</div>
+        </div>
+        <div class="handle" id="s7-handle">@ai-deo</div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* Persistent ambient (65s) */
+      tl.fromTo("#bg-go", { scale: 1.0, opacity: 0.75 }, { scale: 1.10, opacity: 1, duration: 8, ease: "sine.inOut", yoyo: true, repeat: 7 }, 0);
+      tl.fromTo("#bg-gt", { scale: 1.0, opacity: 0.8 }, { scale: 1.08, opacity: 1, duration: 10, ease: "sine.inOut", yoyo: true, repeat: 5 }, 1);
+      tl.fromTo("#brand-logo", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.3);
+      tl.fromTo("#prog", { width: "0%" }, { width: "100%", duration: 65, ease: "none" }, 0);
+
+      /* SEQ 1 (0-3) */
+      tl.fromTo("#s1-tag", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0.15);
+      tl.fromTo("#s1-date", { opacity: 0, y: 60, filter: "blur(20px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.65, ease: "power3.out" }, 0.35);
+      tl.fromTo("#s1-year", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.55, ease: "power3.out" }, 0.75);
+      tl.fromTo("#s1-sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 1.15);
+
+      /* SEQ 2 (3-13) */
+      const t2 = 3;
+      tl.fromTo("#s2-kick", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t2 + 0.15);
+      tl.fromTo("#s2-l1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, t2 + 0.35);
+      tl.fromTo("#s2-l2", { opacity: 0, y: 80, scale: 0.94, filter: "blur(16px)" }, { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.7, ease: "power3.out" }, t2 + 0.70);
+      tl.fromTo("#s2-cA", { opacity: 0, x: -70 }, { opacity: 1, x: 0, duration: 0.55, ease: "power3.out" }, t2 + 1.55);
+      tl.fromTo("#s2-cB", { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.55, ease: "power3.out" }, t2 + 1.85);
+
+      /* SEQ 3 (13-25) */
+      const t3 = 13;
+      tl.fromTo("#s3-badge", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, t3 + 0.15);
+      tl.fromTo("#s3-big", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t3 + 0.40);
+      tl.fromTo("#s3-sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t3 + 0.80);
+      tl.fromTo("#s3-ch1", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t3 + 1.20);
+      tl.fromTo("#s3-ch2", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t3 + 1.50);
+      tl.fromTo("#s3-ch3", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t3 + 1.80);
+
+      /* SEQ 4 (25-33) */
+      const t4 = 25;
+      tl.fromTo("#s4-kick", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t4 + 0.15);
+      tl.fromTo("#s4-big", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t4 + 0.40);
+      tl.fromTo("#s4-card", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, t4 + 1.10);
+      tl.fromTo("#s4-warn", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }, t4 + 3.20);
+
+      /* SEQ 5 (33-52) */
+      const t5 = 33;
+      tl.fromTo("#s5-kick", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t5 + 0.15);
+      tl.fromTo("#s5-header", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, t5 + 0.35);
+      tl.fromTo("#s5-i1", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t5 + 0.75);
+      tl.fromTo("#s5-i2", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t5 + 1.10);
+      tl.fromTo("#s5-i3", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t5 + 8.40);
+      tl.fromTo("#s5-i4", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t5 + 12.20);
+      // Highlight item 2 while DONNÉES SENSIBLES callout is visible
+      tl.fromTo("#s5-i2", { boxShadow: "0 0 0 rgba(0,0,0,0)" }, { boxShadow: "0 0 30px rgba(252,137,2,0.25)", duration: 0.4, ease: "power2.out" }, t5 + 3.5);
+      // DONNÉES SENSIBLES callout — appears at ~t=37s (scene-time 4s), stays until ~t=44s (scene-time 11s), then exits
+      tl.set("#ds-callout", { opacity: 0, y: 60 }, t5);
+      tl.to("#ds-callout", { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, t5 + 4.0);
+      tl.to("#ds-callout", { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, t5 + 10.5);
+
+      /* SEQ 6 (52-60) */
+      const t6 = 52;
+      tl.fromTo("#s6-kick", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t6 + 0.15);
+      tl.fromTo("#s6-w1", { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, t6 + 0.45);
+      tl.fromTo("#s6-plus", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }, t6 + 0.90);
+      tl.fromTo("#s6-w2", { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, t6 + 1.20);
+      tl.fromTo("#s6-sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t6 + 1.80);
+
+      /* SEQ 7 (60-65) */
+      const t7 = 60;
+      tl.fromTo("#s7-greet", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, t7 + 0.10);
+      tl.fromTo("#s7-name", { opacity: 0, y: 60, filter: "blur(16px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }, t7 + 0.30);
+      tl.fromTo("#s7-role", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, t7 + 0.80);
+      tl.fromTo("#s7-b1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, t7 + 1.35);
+      tl.fromTo("#s7-b2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, t7 + 1.55);
+      tl.fromTo("#s7-handle", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t7 + 1.95);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
